@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,7 @@ const CodeEditor = ({ code, onChange, language, onLanguageChange }: CodeEditorPr
     { value: 'java', label: 'Java' },
     { value: 'cpp', label: 'C++' },
     { value: 'csharp', label: 'C#' },
+    { value: 'kotlin', label: 'Kotlin' },
   ];
 
   const fontSizes = [
@@ -47,6 +47,10 @@ const CodeEditor = ({ code, onChange, language, onLanguageChange }: CodeEditorPr
     
 }`,
       csharp: `public int[] TwoSum(int[] nums, int target) {
+    // Write your solution here
+    
+}`,
+      kotlin: `fun twoSum(nums: IntArray, target: Int): IntArray {
     // Write your solution here
     
 }`
