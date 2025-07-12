@@ -7,6 +7,7 @@ const VideoInterview = () => {
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const STREAM_VIDEO_URL = "https://d-id-talks-prod.s3.us-west-2.amazonaws.com/google-oauth2%7C101411278667830502213/tlk_b6Fx6592auNi0YP63KShE/1752318481218.mp4?AWSAccessKeyId=AKIA5CUMPJBIK65W6FGA&Expires=1752404913&Signature=WLylqTJn7FPERQcdwE%2FR%2B24lSso%3D";
@@ -15,17 +16,46 @@ const VideoInterview = () => {
     setIsCallActive(!isCallActive);
     
     if (!isCallActive && videoRef.current) {
+      // Reset video error state
+      setVideoError(false);
+      
       // Start playing the video when joining the call
-      videoRef.current.play().catch(error => {
-        console.error('Error playing video:', error);
-      });
+      const playPromise = videoRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('Video started playing successfully');
+          })
+          .catch(error => {
+            console.error('Error playing video:', error);
+            setVideoError(true);
+          });
+      }
+    } else if (isCallActive && videoRef.current) {
+      videoRef.current.pause();
     }
   };
 
   useEffect(() => {
     if (videoRef.current && isCallActive) {
-      videoRef.current.muted = true; // Start muted to allow autoplay
-      videoRef.current.loop = true; // Loop the video
+      const video = videoRef.current;
+      
+      // Configure video properties
+      video.muted = true; // Required for autoplay in most browsers
+      video.playsInline = true; // Important for mobile devices
+      video.controls = false;
+      video.loop = true;
+      
+      // Add event listeners
+      video.addEventListener('loadstart', () => console.log('Video load started'));
+      video.addEventListener('loadeddata', () => console.log('Video data loaded'));
+      video.addEventListener('canplay', () => console.log('Video can start playing'));
+      video.addEventListener('playing', () => console.log('Video is playing'));
+      video.addEventListener('error', (e) => {
+        console.error('Video error event:', e);
+        setVideoError(true);
+      });
     }
   }, [isCallActive]);
 
@@ -55,27 +85,35 @@ const VideoInterview = () => {
         ) : (
           <div className="h-full bg-slate-800 relative">
             {/* Streaming video feed */}
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              src={STREAM_VIDEO_URL}
-              muted
-              playsInline
-              onError={(e) => {
-                console.error('Video error:', e);
-              }}
-            />
-
-            {/* Fallback overlay if video fails to load */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-24 h-24 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">👨‍💻</span>
+            {!videoError ? (
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                src={STREAM_VIDEO_URL}
+                muted
+                playsInline
+                loop
+                preload="metadata"
+                onError={(e) => {
+                  console.error('Video error:', e);
+                  setVideoError(true);
+                }}
+                onLoadStart={() => console.log('Video loading started')}
+                onCanPlay={() => console.log('Video can play')}
+                onPlaying={() => console.log('Video is now playing')}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-slate-700">
+                <div className="text-center">
+                  <div className="w-24 h-24 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">👨‍💻</span>
+                  </div>
+                  <p className="text-slate-300">Interviewer - Alex Chen</p>
+                  <p className="text-slate-500 text-sm">Senior Software Engineer</p>
+                  <p className="text-red-400 text-xs mt-2">Video failed to load</p>
                 </div>
-                <p className="text-slate-300">Interviewer - Alex Chen</p>
-                <p className="text-slate-500 text-sm">Senior Software Engineer</p>
               </div>
-            </div>
+            )}
 
             {/* Self video - picture in picture */}
             <div className="absolute bottom-4 right-4 w-32 h-24 bg-slate-700 rounded-lg border-2 border-slate-600 flex items-center justify-center">
