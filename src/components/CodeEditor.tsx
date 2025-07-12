@@ -106,7 +106,7 @@ const CodeEditor = ({ code, onChange, language, onLanguageChange }: CodeEditorPr
         <textarea
           value={code}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-full bg-slate-900 text-white font-mono resize-none outline-none border-none p-4"
+          className="w-full h-full bg-slate-900 text-white font-mono resize-none outline-none border-none pl-14 pr-4 py-4"
           style={{ fontSize: `${fontSize}px`, lineHeight: '1.5' }}
           placeholder="Start coding your solution here..."
           spellCheck={false}
@@ -120,13 +120,6 @@ const CodeEditor = ({ code, onChange, language, onLanguageChange }: CodeEditorPr
             ))}
           </div>
         </div>
-        
-        {/* Adjust textarea padding to account for line numbers */}
-        <style jsx>{`
-          textarea {
-            padding-left: 3.5rem !important;
-          }
-        `}</style>
       </div>
     </div>
   );
