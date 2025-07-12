@@ -1,11 +1,13 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import QuestionPanel from '../components/QuestionPanel';
 import VideoInterview from '../components/VideoInterview';
 import CodeEditor from '../components/CodeEditor';
 import TestResults from '../components/TestResults';
 import { Button } from '@/components/ui/button';
 import { Play, Square } from 'lucide-react';
+import { fetchQuestion, QuestionData } from '../services/questionService';
 
 interface TestCase {
   input: string;
@@ -24,29 +26,11 @@ const Index = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [language, setLanguage] = useState('javascript');
 
-  // Sample question data
-  const questionData = {
-    questionId: 1,
-    questionTitle: "Two Sum",
-    questionDescription: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.\n\nYou may assume that each input would have exactly one solution, and you may not use the same element twice.\n\nYou can return the answer in any order.",
-    constraints: [
-      "2 ≤ nums.length ≤ 10⁴",
-      "-10⁹ ≤ nums[i] ≤ 10⁹",
-      "-10⁹ ≤ target ≤ 10⁹",
-      "Only one valid answer exists."
-    ],
-    example: {
-      input: "nums = [2,7,11,15], target = 9",
-      output: "[0,1]"
-    },
-    hints: [
-      "A really brute force way would be to search for all possible pairs of numbers but that would be too slow. Again, it's best to try out brute force solutions for just for completeness. It is from these brute force solutions that you can come up with optimizations.",
-      "So, if we fix one of the numbers, say x, we have to scan the entire array to find the next number y which is value - x where value is the input parameter. Can we change our array somehow so that this search becomes faster?",
-      "The second train of thought is, without changing the array, can we use additional space somehow? Like maybe a hash map to speed up the search?"
-    ],
-    tags: ["Array", "Hash Table"],
-    difficulty: "Easy"
-  };
+  // Fetch question data using React Query
+  const { data: questionData, isLoading, error } = useQuery({
+    queryKey: ['question', 1], // You can make this dynamic based on route params
+    queryFn: () => fetchQuestion(1),
+  });
 
   const handleRunCode = () => {
     setIsRunning(true);
@@ -77,6 +61,32 @@ const Index = () => {
       setIsRunning(false);
     }, 2000);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading question...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">Error loading question</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!questionData) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-white">

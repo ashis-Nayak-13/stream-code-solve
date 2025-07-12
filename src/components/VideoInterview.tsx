@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Video, VideoOff, Mic, MicOff, Phone, PhoneOff } from 'lucide-react';
 
@@ -7,10 +7,27 @@ const VideoInterview = () => {
   const [isVideoOn, setIsVideoOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isCallActive, setIsCallActive] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const STREAM_VIDEO_URL = "https://d-id-talks-prod.s3.us-west-2.amazonaws.com/google-oauth2%7C101411278667830502213/tlk_b6Fx6592auNi0YP63KShE/1752318481218.mp4?AWSAccessKeyId=AKIA5CUMPJBIK65W6FGA&Expires=1752404913&Signature=WLylqTJn7FPERQcdwE%2FR%2B24lSso%3D";
 
   const handleJoinCall = () => {
     setIsCallActive(!isCallActive);
+    
+    if (!isCallActive && videoRef.current) {
+      // Start playing the video when joining the call
+      videoRef.current.play().catch(error => {
+        console.error('Error playing video:', error);
+      });
+    }
   };
+
+  useEffect(() => {
+    if (videoRef.current && isCallActive) {
+      videoRef.current.muted = true; // Start muted to allow autoplay
+      videoRef.current.loop = true; // Loop the video
+    }
+  }, [isCallActive]);
 
   return (
     <div className="h-full bg-slate-900 border-slate-700">
@@ -37,8 +54,20 @@ const VideoInterview = () => {
           </div>
         ) : (
           <div className="h-full bg-slate-800 relative">
-            {/* Simulated video feed */}
-            <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
+            {/* Streaming video feed */}
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              src={STREAM_VIDEO_URL}
+              muted
+              playsInline
+              onError={(e) => {
+                console.error('Video error:', e);
+              }}
+            />
+
+            {/* Fallback overlay if video fails to load */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center">
               <div className="text-center">
                 <div className="w-24 h-24 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">👨‍💻</span>
