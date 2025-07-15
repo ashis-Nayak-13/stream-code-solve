@@ -10,7 +10,7 @@ const VideoInterview = () => {
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const STREAM_VIDEO_URL = "https://d-id-talks-prod.s3.us-west-2.amazonaws.com/google-oauth2%7C101411278667830502213/tlk_b6Fx6592auNi0YP63KShE/1752318481218.mp4?AWSAccessKeyId=AKIA5CUMPJBIK65W6FGA&Expires=1752404913&Signature=WLylqTJn7FPERQcdwE%2FR%2B24lSso%3D";
+  const STREAM_VIDEO_URL = "https://www.sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4";
 
   const handleJoinCall = () => {
     setIsCallActive(!isCallActive);
