@@ -19,7 +19,9 @@ const VideoInterview = () => {
       // Reset video error state
       setVideoError(false);
       
-      // Start playing the video when joining the call
+      // Load and play the video
+      videoRef.current.load();
+      
       const playPromise = videoRef.current.play();
       
       if (playPromise !== undefined) {
@@ -29,7 +31,14 @@ const VideoInterview = () => {
           })
           .catch(error => {
             console.error('Error playing video:', error);
-            setVideoError(true);
+            // Try to play again after a short delay
+            setTimeout(() => {
+              if (videoRef.current) {
+                videoRef.current.play().catch(() => {
+                  setVideoError(true);
+                });
+              }
+            }, 1000);
           });
       }
     } else if (isCallActive && videoRef.current) {
@@ -89,11 +98,11 @@ const VideoInterview = () => {
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"
-                src={STREAM_VIDEO_URL}
                 muted
                 playsInline
                 loop
-                preload="metadata"
+                preload="none"
+                crossOrigin="anonymous"
                 onError={(e) => {
                   console.error('Video error:', e);
                   setVideoError(true);
@@ -101,7 +110,13 @@ const VideoInterview = () => {
                 onLoadStart={() => console.log('Video loading started')}
                 onCanPlay={() => console.log('Video can play')}
                 onPlaying={() => console.log('Video is now playing')}
-              />
+                onLoadedData={() => console.log('Video data loaded')}
+                onStalled={() => console.log('Video stalled')}
+                onWaiting={() => console.log('Video waiting')}
+              >
+                <source src={STREAM_VIDEO_URL} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-slate-700">
                 <div className="text-center">
